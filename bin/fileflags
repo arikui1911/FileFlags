@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+
+require 'fileflags'
+require 'optparse'
+
+def error(msg)
+  $stderr.print "#{ARGV.options.program_name}: "
+  $stderr.puts msg
+  exit 1
+end
+
+def aborted_script_report(e, with_trace = false)
+  msg = e.message.empty? ? e.class.name : e.message
+  return msg unless with_trace
+  buf = "Application aborted!\n"
+  buf << "#{e.backtrace.first}: #{msg} (#{e.class.name})\n"
+  buf << e.backtrace.drop(1).map{|b| "\tfrom #{b}\n" }.join
+  buf
+end
+
+
+trace_p = false
+
+ARGV.options do |o|
+  o.banner = "Usage: #{o.program_name} APP_SCRIPT"
+  o.on '--[no-]trace', 'Print stack trace of app script on error' do |flag|
+    trace_p = flag
+  end
+end
+
+begin
+  ARGV.parse!
+rescue OptionParser::ParseError => ex
+  error ex.message
+end
+ARGV.empty? and error "no input file."
+
+begin
+  ARGV.each{|file| load file, true }
+rescue Exception => ex
+  error aborted_script_report(ex, trace_p)
+end
+
+FileFlags.suites.each do |suite|
+  suite.execute
+end
+
+
