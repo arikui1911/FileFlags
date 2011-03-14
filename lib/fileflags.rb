@@ -12,40 +12,12 @@ module FileFlags
 
     def initialize(directory, &block)
       @dir = File.expand_path(directory)
-      raise ArgumentError, "no such directory - #{directory}" unless File.directory?(directory)
+      raise ArgumentError, "no such directory - #{directory}" unless File.directory?(@dir)
       @startups  = []
       @shutdowns = []
       @matchers  = []
+      @traps     = {}
       @context   = create_context_class(&block)
-    end
-
-    def create_context_class(&body)
-      table = {
-        startup:  @startups,
-        shutdown: @shutdowns,
-        file:     @matchers,
-      }
-      Class.new{
-        define_singleton_method(:startup){|&block| table[:startup] << block }
-        define_singleton_method(:shutdown){|&block| table[:shutdown] << block }
-        define_singleton_method(:file){|glob, &block| table[:file] << [glob, block] }
-        class_eval(&body)
-      }
-    end
-
-    def updated?(entry)
-      entry.updated?(@timestamp)
-    end
-
-    def load_timestamp
-      @timestamp = YAML.load_file(File.join(@dir, TS_FILE))
-    rescue Errno::ENOENT
-      @timestamp = Time.now
-    end
-
-    def update_timestamp
-      @timestamp = Time.now
-      File.open(File.join(@dir, TS_FILE), 'w'){|f| YAML.dump @timestamp, f }
     end
 
     def execute
@@ -63,6 +35,44 @@ module FileFlags
       @shutdowns.each{|hook| context.instance_eval(&hook) }
     ensure
       update_timestamp
+    end
+
+    private
+
+    def create_context_class(&body)
+      table = {
+        startup:  @startups,
+        shutdown: @shutdowns,
+        file:     @matchers,
+        trap:     @traps,
+      }
+      Class.new{
+        define_singleton_method(:startup){|&block| table[:startup] << block }
+        define_singleton_method(:shutdown){|&block| table[:shutdown] << block }
+        define_singleton_method(:file){|glob, &block| table[:file] << [glob, block] }
+        define_singleton_method(:error_case){|*ex_classes, &block|
+          ex_classes << RuntimeError if ex_classes.empty?
+          ex_classes.each do |ec|
+            (table[:trap][ec] ||= []) << block
+          end
+        }
+        class_eval(&body)
+      }
+    end
+
+    def updated?(entry)
+      entry.updated?(@timestamp)
+    end
+
+    def load_timestamp
+      @timestamp = YAML.load_file(File.join(@dir, TS_FILE))
+    rescue Errno::ENOENT
+      @timestamp = Time.now
+    end
+
+    def update_timestamp
+      @timestamp = Time.now
+      File.open(File.join(@dir, TS_FILE), 'w'){|f| YAML.dump @timestamp, f }
     end
   end
 
