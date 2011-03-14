@@ -16,7 +16,6 @@ module FileFlags
       @startups  = []
       @shutdowns = []
       @matchers  = []
-      @traps     = {}
       @context   = create_context_class(&block)
     end
 
@@ -44,18 +43,11 @@ module FileFlags
         startup:  @startups,
         shutdown: @shutdowns,
         file:     @matchers,
-        trap:     @traps,
       }
       Class.new{
         define_singleton_method(:startup){|&block| table[:startup] << block }
         define_singleton_method(:shutdown){|&block| table[:shutdown] << block }
         define_singleton_method(:file){|glob, &block| table[:file] << [glob, block] }
-        define_singleton_method(:error_case){|*ex_classes, &block|
-          ex_classes << RuntimeError if ex_classes.empty?
-          ex_classes.each do |ec|
-            (table[:trap][ec] ||= []) << block
-          end
-        }
         class_eval(&body)
       }
     end
