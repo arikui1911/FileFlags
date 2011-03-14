@@ -1,20 +1,70 @@
 * FileFlags
 
-1. Write *app_script* (Ruby script with FileFlags DSL).
-2. Execute it.
+FileFlagsは、あるディレクトリにまとめられたファイル群に対して、更新さ
+れているものをピックアップし、何らかの処理を適用するためのフレームワー
+クです。
+
+おおざっぱな使いかた：
+- 1. FileFlags DSLを用いてアプリケーションを書く
+- 2. fileflagsコマンドにそれを実行してもらう
 
 : $ fileflags APP_SCRIPT
 
 
+** Example
+
+アプリケーションスクリプトの例：
+
+#+BEGIN_SRC ruby
+require 'fileflags'
+
+FileFlags "path/to/dir" do
+  startup do
+    puts "STARTUP!"
+  end
+
+  file "*.txt" do |e|
+    e.open do |f|
+      puts "TXT: #{f.gets}"
+    end
+  end
+
+  file "*.rb" do |e|
+    e.open do |f|
+      puts "RB: #{f.gets}"
+    end
+  end
+
+  shutdown do
+    puts "SHUTDOWN!"
+  end
+end
+#+END_SRC
+
+出力例：
+
+#+BEGIN_EXAMPLE
+STARTUP!
+TXT: ...
+TXT: ...
+RB: ...
+SHUTDOWN!
+#+END_EXAMPLE
+
+
 ** ToDo
 
-- Write test!
-- Write document!
+- テストを書く
+- ドキュメントを書く
 
 
-** Why it was born?
+** 開発動機
 
-I want to use it to write a application which is likes
-"Hatena diary writer".
+「はてなダイアリーライター」のRubyクローンのさらにクローンなんてものを
+いくつか書いてるうちに、「あるタイムスタンプと比べて更新されているファ
+イルをどうこうする」という部分はライブラリとして切り出せるな、と思った
+ので。
 
+
+Copyrights (C) 2011 arikui <arikui.ruby@gmail.com>
 
