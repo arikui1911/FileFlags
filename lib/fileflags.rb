@@ -1,6 +1,7 @@
 require 'forwardable'
 require 'date'
 require 'yaml'
+require 'singleton'
 
 module FileFlags
   def self.suites
@@ -53,13 +54,13 @@ module FileFlags
     end
 
     def updated?(entry)
-      entry.updated?(@timestamp)
+      @timestamp ? entry.updated?(@timestamp) : true
     end
 
     def load_timestamp
       @timestamp = YAML.load_file(File.join(@dir, TS_FILE))
     rescue Errno::ENOENT
-      @timestamp = Time.now
+      @timestamp = nil
     end
 
     def update_timestamp
