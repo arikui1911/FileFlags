@@ -1,0 +1,20 @@
+* FileFlags
+
+1. Write *app_script* (Ruby script with FileFlags DSL).
+2. Execute it.
+
+: $ fileflags APP_SCRIPT
+
+
+** ToDo
+
+- Write test!
+- Write document!
+
+
+** Why it was born?
+
+I want to use it to write a application which is likes
+"Hatena diary writer".
+
+
