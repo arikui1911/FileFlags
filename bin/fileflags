@@ -37,12 +37,11 @@ ARGV.empty? and error "no input file."
 
 begin
   ARGV.each{|file| load file, true }
+  FileFlags.suites.each do |suite|
+    suite.execute
+  end
 rescue Exception => ex
   error aborted_script_report(ex, trace_p)
-end
-
-FileFlags.suites.each do |suite|
-  suite.execute
 end
 
 
