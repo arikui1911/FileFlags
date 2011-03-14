@@ -24,9 +24,12 @@ gemspec = Gem::Specification.new do |s|
 
   etc = [README, "LICENSE"]
 
+  s.bindir = 'bin'
+  s.executables = ["fileflags"]
+  s.require_path = 'lib'
   s.test_files = TESTS
   s.extra_rdoc_files = etc
-  s.files = LIBS + TESTS + etc
+  s.files = ['bin/fileflags'] + LIBS + TESTS + etc
 
   s.rdoc_options = ["--title", "fileflags documentation",
                     "--opname", "index.html",
