@@ -2,6 +2,7 @@ require 'rubygems'
 require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rake/gempackagetask'
+require_relative './lib/fileflags'
 
 
 task 'default' => 'test'
@@ -13,7 +14,7 @@ README  = "README_ja.org"
 
 gemspec = Gem::Specification.new do |s|
   s.name              = "fileflags"
-  s.version           = "0.0.1"
+  s.version           = FileFlags.version
   s.authors           = ["arikui"]
   s.date              = "2011-03-14"
   s.rubyforge_project = "fileflags"
