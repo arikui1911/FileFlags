@@ -36,7 +36,9 @@ end
 ARGV.empty? and error "no input file."
 
 begin
-  ARGV.each{|file| load file, true }
+  ARGV.each do |file|
+    Dir.chdir(File.dirname(file)){ load file, true }
+  end
   FileFlags.suites.each do |suite|
     suite.execute
   end
