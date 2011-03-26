@@ -21,18 +21,20 @@ module FileFlags
     end
 
     def execute
-      load_timestamp
-      context = @context.new
-      @startups.each{|hook| context.instance_eval(&hook) }
-      Entry.glob(@dir).each do |e|
-        @matchers.each do |pattern, func|
-          if updated?(e) && e.fnmatch(pattern)
-            context.instance_exec(e, &func)
-            break
+      Dir.chdir(@dir) do
+        load_timestamp
+        context = @context.new
+        @startups.each{|hook| context.instance_eval(&hook) }
+        Entry.glob(@dir).each do |e|
+          @matchers.each do |pattern, func|
+            if updated?(e) && e.fnmatch(pattern)
+              context.instance_exec(e, &func)
+              break
+            end
           end
         end
+        @shutdowns.each{|hook| context.instance_eval(&hook) }
       end
-      @shutdowns.each{|hook| context.instance_eval(&hook) }
     ensure
       update_timestamp
     end
