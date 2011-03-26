@@ -4,6 +4,12 @@ require 'yaml'
 require 'singleton'
 
 module FileFlags
+  VERSION = '0.0.2'
+
+  def self.version
+    VERSION
+  end
+
   def self.suites
     @suites ||= []
   end
