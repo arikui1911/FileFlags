@@ -7,7 +7,7 @@ require 'fileutils'
 
 class TestFileFlagsEntry < Test::Unit::TestCase
   def with_temp_dir(&block)
-    Dir.mktmpdir{|dir| Dir.chdir(&block) }
+    Dir.mktmpdir{|dir| Dir.chdir(dir, &block) }
   end
 
   include FileUtils
